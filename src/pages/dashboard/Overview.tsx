@@ -6,9 +6,6 @@ type ContextType = {
   selectedWeek: number;
 };
 
-const { selectedWeek } = useOutletContext<ContextType>();
-
-
 type Metrics = {
   delivery_score: number;
   accuracy_score: number;
@@ -19,6 +16,7 @@ type Metrics = {
 
 export default function Overview() {
   const { selectedWeek } = useOutletContext<ContextType>();
+
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -26,22 +24,21 @@ export default function Overview() {
     async function fetchMetrics() {
       setLoading(true);
       try {
-        const res = await fetch(
-          `http://localhost:8000/metrics/${selectedWeek.value}`
+        const response = await fetch(
+          `http://localhost:8000/metrics/${selectedWeek}`
         );
-        const data = await res.json();
+        const data = await response.json();
         setMetrics(data);
-      } catch (err) {
-        console.error("Failed to fetch metrics");
+      } catch (error) {
+        console.error("Error fetching metrics:", error);
       }
       setLoading(false);
     }
 
     fetchMetrics();
-  }, [selectedWeek]);
+  }, [selectedWeek]); // 👈 runs whenever week changes
 
   if (loading) return <div>Loading metrics...</div>;
-
   if (!metrics) return null;
 
   const kpis = [
@@ -73,26 +70,21 @@ export default function Overview() {
   ];
 
   return (
-    <div className="space-y-6 animate-fade-in">
-
+    <div className="space-y-6">
       <h2 className="text-xl font-semibold">
-        Week {selectedWeek.value} Performance Overview
+        Week {selectedWeek} Performance Overview
       </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-        {kpis.map((kpi, i) => (
+        {kpis.map((kpi, index) => (
           <div
-            key={i}
-            className="card-glass rounded-xl p-5 border border-border hover:scale-[1.02] transition-all"
+            key={index}
+            className="card-glass rounded-xl p-5 border border-border"
           >
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center">
-                <kpi.icon className="w-4 h-4 text-primary" />
-              </div>
+            <div className="mb-3">
+              <kpi.icon className="w-5 h-5 text-primary" />
             </div>
-            <div className="text-2xl font-bold text-foreground mb-1">
-              {kpi.value}
-            </div>
+            <div className="text-2xl font-bold">{kpi.value}</div>
             <div className="text-xs text-muted-foreground">
               {kpi.label}
             </div>
