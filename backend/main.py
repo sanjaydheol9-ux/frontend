@@ -35,13 +35,15 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:8080"],  # frontend URL
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 # -----------------------
 # MODELS
@@ -207,3 +209,4 @@ def ai_insights(current_week: int, previous_week: int):
     result = generate_week_insights(current_week, previous_week)
 
     return AIInsightsResponse(**result)
+
